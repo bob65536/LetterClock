@@ -6,19 +6,6 @@ Credits to : NeoPixel Ring simple sketch (c) 2013 Shae Erisson
 Released under the GPLv3 license to match the rest of the
 Adafruit NeoPixel library
 
-Progress: 
-    Rev 0.0.1: Nothing is ready yet!
-    Rev 0.0.2: Implementation finished but nothing works (bugs)
-    Rev 0.1: just looping with rendom time (test)
-    Rev 0.2: adding support of RTC
->   Rev 1: Show the right time
-    Rev 1.1: Support LDR to adapt brightness
-    Rev 1.2: Add buttons to set time
-    Rev 1.3: Fancy colors
-    Rev 2: Add demo switches to show nice things (heart, etc)
-    Rev 3: Add alarm and buzzer
-    Rev 4: ???
-
  */
 
 
