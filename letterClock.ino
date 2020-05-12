@@ -29,11 +29,19 @@ Adafruit NeoPixel library
 // #define PIN5  8
 
 #define NUMPIXELS   100 // How many pixels in there (per pin)
-#define BRIGHT      40 // Brightness, between 0 and 255
+#define BRIGHT      30 // Brightness, between 0 and 255
 
 #define DELAYVAL    5000 // Time (in milliseconds) to pause between pixels
 
 Adafruit_NeoPixel pixels(NUMPIXELS, PIN, NEO_GRB + NEO_KHZ800);
+
+typedef struct 
+{
+    uint8_t r;
+    uint8_t g;
+    uint8_t b;
+} RGB_colors_t;
+
 
 /* 
     Define line of letters for writing words
@@ -257,7 +265,7 @@ int getSizeArray(int* pTable)
     return pTable[0];
 }
 
-void turnLedOnArray(int* pTable, int r, int g, int b)
+void turnLedOnArray(int* pTable, RGB_colors_t arrayCol)
 {
     int sizeArray = getSizeArray(pTable);
 
@@ -267,7 +275,7 @@ void turnLedOnArray(int* pTable, int r, int g, int b)
     { 
         // Serial.print("Turning LED #");
         // Serial.println(pTable[i]);
-        pixels.setPixelColor(pTable[i]-1, pixels.Color(r, g, b));
+        pixels.setPixelColor(pTable[i]-1, pixels.Color(arrayCol.r, arrayCol.g, arrayCol.b));
     }
     pixels.show();   // Send the updated pixel colors to the hardware.
 }
@@ -285,8 +293,6 @@ void setup()
 #endif
 }
 
-uint32_t old_ts;
-
 void loop() 
 {
     Serial.println("*** Start loop ***");
@@ -301,20 +307,26 @@ void loop()
     // int mo = now.month();
     // int yr = now.year();
 
-    pixels.clear(); // Set all pixel colors to 'off'
+    pixels.clear(); // Set all pixel colors to 'off' - not good practice
 
     Serial.print("*** It is ");
     Serial.print(h);
     Serial.print(":");
     Serial.println(m);
-    
-    turnLedOnArray(itis, BRIGHT, 0, 0);
-    turnLedOnArray(getMinutes(m), BRIGHT, 0, 0);
-    turnLedOnArray(getPreciseMinutes(m), BRIGHT, 0, 0);
-    turnLedOnArray(getPasTo(m), BRIGHT, 0, 0);
-    turnLedOnArray(getHour(h, m), BRIGHT, 0, 0);
-    turnLedOnArray(getHourAmPm(h, m), BRIGHT, 0, 0);
-    delay(15000);
+
+    RGB_colors_t colorToUse;
+    // Use red color for testing
+    colorToUse.r = BRIGHT;
+    colorToUse.g = 0;
+    colorToUse.b = 0;
+
+    turnLedOnArray(itis, colorToUse);
+    turnLedOnArray(getMinutes(m), colorToUse);
+    turnLedOnArray(getPreciseMinutes(m), colorToUse);
+    turnLedOnArray(getPasTo(m), colorToUse);
+    turnLedOnArray(getHour(h, m), colorToUse);
+    turnLedOnArray(getHourAmPm(h, m), colorToUse);
+    delay(5000);
 #else
     pixels.clear(); // Set all pixel colors to 'off'
     for (int h = 0; h < 24; h++)
