@@ -11,7 +11,7 @@ Adafruit NeoPixel library
 
 #define RTC         1 // Enable RTC support
 
-
+#include "letterClock.h"
 #include <Adafruit_NeoPixel.h>
 #ifdef RTC
     #include <Wire.h>
@@ -31,66 +31,17 @@ Adafruit NeoPixel library
 #define NUMPIXELS   100 // How many pixels in there (per pin)
 #define BRIGHT      30 // Brightness, between 0 and 255
 
-#define DELAYVAL    5000 // Time (in milliseconds) to pause between pixels
+#define DELAYVAL    1000 // Time (in milliseconds) to pause between pixels
 
 Adafruit_NeoPixel pixels(NUMPIXELS, PIN, NEO_GRB + NEO_KHZ800);
 
-typedef struct 
-{
-    uint8_t r;
-    uint8_t g;
-    uint8_t b;
-} RGB_colors_t;
+/* Arrays to turn on (struct of pointers to array ) */
+ArraysToTurnOn_t arraysToTurnOn; // Led to light NOW (in this loop)
+ArraysToTurnOn_t arraysAlreadyOn; // LED already turned on
+Time_t currTime;
 
 
-/* 
-    Define line of letters for writing words
-    Note: if count from 0, remove 1 from these values!
-    Also: First value is the length of array. Do not turn the LED ID on!!!
-*/
-// Always on ("it is...")
-int itis[] = {4, 1,2,4,5};
 
-// Hours
-int h1[] = {3, 76,77,78};
-int h2[] = {3, 78,79,80};
-int h3[] = {5, 41,42,43,44,45};
-int h4[] = {4, 31,32,33,34};
-int h5[] = {4, 67,68,69,70};
-int h6[] = {3, 81,82,83};
-int h7[] = {5, 71,72,73,74,75};
-int h8[] = {5, 53,54,55,56,57};
-int h9[] = {4, 57,58,59,60};
-int h10[] = {3, 51,52,53};
-int h11[] = {6, 45,46,47,48,49,50};
-int h12[] = {6, 61,62,63,64,65,66};
-
-int am[] = {2, 99,100};
-int pm[] = {2, 97,98};
-
-// Past/To/OClock
-int past[] = {4, 37,38,39,40};
-int to[] = {2, 36,37};
-int oclock[] = {6, 85,86,87,88,89,90};
-
-// Minutes
-int m5[]  = {4, 11,12,13,14};
-int m10[] = {3, 28,29,30};
-int m15[] = {8, 8,21,22,23,24,25,26,27};
-int m20[] = {6, 15,16,17,18,19,20};
-int m25[] = {10, 11,12,13,14,15,16,17,18,19,20};
-int m30[] = {4, 7,8,9,10};
-
-int m0[] = {0};
-int m1[] = {1, 94};
-int m2[] = {1, 93};
-int m3[] = {1, 92};
-int m4[] = {1, 91};
-
-/*
-    This function returns a pointer with the right LEDs to turn on
-    In this case, it will be the right table for hours
-*/
 int* getHour(int h, int m)
 {
     int hMod = h;
@@ -145,10 +96,7 @@ int* getHour(int h, int m)
     return pRes;
 }
 
-/*
-    This function returns a pointer with the right LEDs to turn on
-    In this case, it will be the right table for AM or PM (US style)
-*/
+
 int* getHourAmPm(int h, int m)
 {
     int hMod = h;
@@ -168,10 +116,6 @@ int* getHourAmPm(int h, int m)
     
 }
 
-/*
-    This function returns a pointer with the right LEDs to turn on
-    In this case, it will be the right table for minutes (precision: 5 min)
-*/
 int* getMinutes(int m)
 {
     int pRes = m0;
@@ -207,10 +151,6 @@ int* getMinutes(int m)
     return pRes;
 }
 
-/*
-    This function returns a pointer with the right LEDs to turn on
-    In this case, it will be the right table for minutes (add 0 to 4 minutes)
-*/
 int* getPreciseMinutes(int m)
 {
     int mMod5 = m % 5;
@@ -238,10 +178,6 @@ int* getPreciseMinutes(int m)
     return pRes;
 }
 
-/*
-    This function returns a pointer with the right LEDs to turn on
-    In this case, it will be the right table for the right words to use (past, to, o'clock)
-*/
 int* getPasTo(int m)
 {
     int pRes = NULL;
@@ -265,7 +201,16 @@ int getSizeArray(int* pTable)
     return pTable[0];
 }
 
-void turnLedOnArray(int* pTable, RGB_colors_t arrayCol)
+void updateArraysToTurnOn(ArraysToTurnOn_t* pArray, Time_t currTime)
+{
+    pArray->minutes = getMinutes(currTime.m);
+    pArray->preciseMinutes = getPreciseMinutes(currTime.m);
+    pArray->pasTo = getPasTo(currTime.m);
+    pArray->hours = getHour(currTime.h, currTime.m);
+    pArray->amPm = getHourAmPm(currTime.h, currTime.m);
+}
+
+void turnLedOnArray(int* pTable, RGB_colors_t ledColor)
 {
     int sizeArray = getSizeArray(pTable);
 
@@ -275,9 +220,50 @@ void turnLedOnArray(int* pTable, RGB_colors_t arrayCol)
     { 
         // Serial.print("Turning LED #");
         // Serial.println(pTable[i]);
-        pixels.setPixelColor(pTable[i]-1, pixels.Color(arrayCol.r, arrayCol.g, arrayCol.b));
+        pixels.setPixelColor(pTable[i]-1, pixels.Color(ledColor.r, ledColor.g, ledColor.b));
     }
     pixels.show();   // Send the updated pixel colors to the hardware.
+}
+
+void turnLedOffArray(int* pTable)
+{
+    int sizeArray = getSizeArray(pTable);
+
+    Serial.print(sizeArray);
+    Serial.println(" LED to light.");
+    for (int i = 1; i <= sizeArray; i++) 
+    { 
+        // Serial.print("Turning LED #");
+        // Serial.println(pTable[i]);
+        pixels.setPixelColor(pTable[i]-1, pixels.Color(0, 0, 0));
+    }
+    pixels.show();   // Send the updated pixel colors to the hardware.
+}
+
+void refreshLedArray(int* pOldTable, int* pNewTable, RGB_colors_t ledColor)
+{
+    if (pOldTable != pNewTable)
+    {
+        turnLedOffArray(pOldTable);
+    }
+    turnLedOnArray(pNewTable, ledColor);
+}
+
+
+void updateTime(Time_t* pTime)
+{
+    DateTime now = rtc.now(); //get the current date-time
+    pTime->h = now.hour();
+    pTime->m = now.minute();
+    pTime->s = now.second();
+    // int dy = now.day();
+    // int mo = now.month();
+    // int yr = now.year();
+    Serial.print("/// RTC says: time is");
+    Serial.print(now.hour());
+    Serial.print(":");
+    Serial.println(now.minute());
+    
 }
 
 void setup() 
@@ -289,31 +275,25 @@ void setup()
     digitalWrite(VIN_RTC, HIGH);
     Wire.begin();
     rtc.begin();
-    delay(2000);
+    delay(200); // To make sure everything is loaded (?)
+    updateTime(&currTime);
+    updateArraysToTurnOn(&arraysAlreadyOn, currTime); // Init variable
 #endif
 }
 
 void loop() 
 {
-    Serial.println("*** Start loop ***");
-
 #ifdef RTC
-    DateTime now = rtc.now(); //get the current date-time
-    uint32_t ts = now.getEpoch();
-    int h = now.hour();
-    int m = now.minute();
-    int s = now.second();
-    // int dy = now.day();
-    // int mo = now.month();
-    // int yr = now.year();
 
-    pixels.clear(); // Set all pixel colors to 'off' - not good practice
-
+    updateTime(&currTime);
+    updateArraysToTurnOn(&arraysToTurnOn, currTime);
     Serial.print("*** It is ");
-    Serial.print(h);
+    Serial.print(currTime.h);
     Serial.print(":");
-    Serial.println(m);
+    Serial.println(currTime.m);    
 
+    // pixels.clear(); // Set all pixel colors to 'off' - not good practice
+ 
     RGB_colors_t colorToUse;
     // Use red color for testing
     colorToUse.r = BRIGHT;
@@ -321,12 +301,15 @@ void loop()
     colorToUse.b = 0;
 
     turnLedOnArray(itis, colorToUse);
-    turnLedOnArray(getMinutes(m), colorToUse);
-    turnLedOnArray(getPreciseMinutes(m), colorToUse);
-    turnLedOnArray(getPasTo(m), colorToUse);
-    turnLedOnArray(getHour(h, m), colorToUse);
-    turnLedOnArray(getHourAmPm(h, m), colorToUse);
-    delay(5000);
+    refreshLedArray(arraysAlreadyOn.minutes ,arraysToTurnOn.minutes, colorToUse);
+    refreshLedArray(arraysAlreadyOn.preciseMinutes, arraysToTurnOn.preciseMinutes, colorToUse);
+    refreshLedArray(arraysAlreadyOn.pasTo ,arraysToTurnOn.pasTo, colorToUse);
+    refreshLedArray(arraysAlreadyOn.hours ,arraysToTurnOn.hours, colorToUse);
+    refreshLedArray(arraysAlreadyOn.amPm ,arraysToTurnOn.amPm, colorToUse);
+  
+
+    updateArraysToTurnOn(&arraysAlreadyOn, currTime); // Copy arraysToTurnOn on arraysAlreadyOn 
+    delay(DELAYVAL);
 #else
     pixels.clear(); // Set all pixel colors to 'off'
     for (int h = 0; h < 24; h++)
