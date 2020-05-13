@@ -111,6 +111,8 @@ void turnLedOffArray(int* pTable);
 
 void refreshLedArray(int* pOldTable, int* pNewTable, uint32_t rgbColors);
 
+uint8_t getBrightnessLdr(void);
+
 void updateTime(Time_t* pTime);
 
 uint32_t setColor(int brightness, int seconds);
