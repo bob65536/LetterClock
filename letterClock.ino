@@ -29,9 +29,10 @@ Adafruit NeoPixel library
 // #define PIN5  8
 
 #define NUMPIXELS   100 // How many pixels in there (per pin)
-#define BRIGHT      30 // Brightness, between 0 and 255
+#define BRIGHT      24 // Brightness, between 0 and 255
+#define SATURATION  240 // For colors: we want bright colors so set it to max!
 
-#define DELAYVAL    1000 // Time (in milliseconds) to pause between pixels
+#define DELAYVAL    600 // Time (in milliseconds) to pause between pixels
 
 Adafruit_NeoPixel pixels(NUMPIXELS, PIN, NEO_GRB + NEO_KHZ800);
 
@@ -210,17 +211,17 @@ void updateArraysToTurnOn(ArraysToTurnOn_t* pArray, Time_t currTime)
     pArray->amPm = getHourAmPm(currTime.h, currTime.m);
 }
 
-void turnLedOnArray(int* pTable, RGB_colors_t ledColor)
+void turnLedOnArray(int* pTable, uint32_t rgbColors)
 {
     int sizeArray = getSizeArray(pTable);
 
-    Serial.print(sizeArray);
-    Serial.println(" LED to light.");
+    // Serial.print(sizeArray);
+    // Serial.println(" LED to light.");
     for (int i = 1; i <= sizeArray; i++) 
     { 
         // Serial.print("Turning LED #");
         // Serial.println(pTable[i]);
-        pixels.setPixelColor(pTable[i]-1, pixels.Color(ledColor.r, ledColor.g, ledColor.b));
+        pixels.setPixelColor(pTable[i]-1, rgbColors);
     }
     pixels.show();   // Send the updated pixel colors to the hardware.
 }
@@ -229,8 +230,8 @@ void turnLedOffArray(int* pTable)
 {
     int sizeArray = getSizeArray(pTable);
 
-    Serial.print(sizeArray);
-    Serial.println(" LED to light.");
+    // Serial.print(sizeArray);
+    // Serial.println(" LED to light.");
     for (int i = 1; i <= sizeArray; i++) 
     { 
         // Serial.print("Turning LED #");
@@ -240,13 +241,13 @@ void turnLedOffArray(int* pTable)
     pixels.show();   // Send the updated pixel colors to the hardware.
 }
 
-void refreshLedArray(int* pOldTable, int* pNewTable, RGB_colors_t ledColor)
+void refreshLedArray(int* pOldTable, int* pNewTable, uint32_t rgbColors)
 {
     if (pOldTable != pNewTable)
     {
         turnLedOffArray(pOldTable);
     }
-    turnLedOnArray(pNewTable, ledColor);
+    turnLedOnArray(pNewTable, rgbColors);
 }
 
 
@@ -259,12 +260,26 @@ void updateTime(Time_t* pTime)
     // int dy = now.day();
     // int mo = now.month();
     // int yr = now.year();
-    Serial.print("/// RTC says: time is");
+    Serial.print("/// RTC says: time is ");
     Serial.print(now.hour());
     Serial.print(":");
-    Serial.println(now.minute());
-    
+    Serial.print(now.minute());
+    Serial.print(":");
+    Serial.println(now.second());
 }
+
+uint32_t setColor(int brightness, int seconds)
+{
+    uint32_t hue = (((uint32_t)65530u * (uint32_t)seconds) / 60u); 
+    // In the end, hue should be between 0 and 65535!
+
+    uint32_t rgb = Adafruit_NeoPixel::ColorHSV(hue, SATURATION, brightness); 
+    // Serial.print("&&& My color: ");
+    // Serial.println(hue);
+    
+    // return Adafruit_NeoPixel::gamma32(rgb); // To get vivid colors
+    return (rgb);
+}   
 
 void setup() 
 {
@@ -287,18 +302,19 @@ void loop()
 
     updateTime(&currTime);
     updateArraysToTurnOn(&arraysToTurnOn, currTime);
-    Serial.print("*** It is ");
-    Serial.print(currTime.h);
-    Serial.print(":");
-    Serial.println(currTime.m);    
-
-    // pixels.clear(); // Set all pixel colors to 'off' - not good practice
+    
+    uint32_t colorToUse = setColor(BRIGHT, currTime.s);
+    // Serial.print("*** It is ");
+    // Serial.print(currTime.h);
+    // Serial.print(":");
+    // Serial.println(currTime.m);    
  
-    RGB_colors_t colorToUse;
-    // Use red color for testing
-    colorToUse.r = BRIGHT;
-    colorToUse.g = 0;
-    colorToUse.b = 0;
+    // RGB_colors_t colorToUse;
+
+    // // Use red color for testing
+    // colorToUse.r = BRIGHT;
+    // colorToUse.g = 0;
+    // colorToUse.b = 0;
 
     turnLedOnArray(itis, colorToUse);
     refreshLedArray(arraysAlreadyOn.minutes ,arraysToTurnOn.minutes, colorToUse);

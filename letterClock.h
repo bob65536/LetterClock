@@ -2,13 +2,6 @@
 
 // Struct
 
-typedef struct 
-{
-    uint8_t r;
-    uint8_t g;
-    uint8_t b;
-} RGB_colors_t;
-
 typedef struct
 {
     int h;
@@ -103,11 +96,12 @@ int getSizeArray(int* pTable);
 
 void updateArraysToTurnOn(ArraysToTurnOn_t* pArray, Time_t currTime);
 
-void turnLedOnArray(int* pTable, RGB_colors_t ledColor);
+void turnLedOnArray(int* pTable, uint32_t rgbColors);
 
 void turnLedOffArray(int* pTable);
 
-void refreshLedArray(int* pOldTable, int* pNewTable, RGB_colors_t ledColor);
+void refreshLedArray(int* pOldTable, int* pNewTable, uint32_t rgbColors);
 
 void updateTime(Time_t* pTime);
 
+uint32_t setColor(int brightness, int seconds);
