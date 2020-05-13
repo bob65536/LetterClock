@@ -10,6 +10,7 @@ Adafruit NeoPixel library
 
 
 #define RTC         1 // Enable RTC support
+#define LIGHT_ALL_PRECISE_MINUTES 1 // Display only current minute or show previous ones (cf issue #10)
 
 #include "letterClock.h"
 #include <Adafruit_NeoPixel.h>
