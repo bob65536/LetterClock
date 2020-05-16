@@ -5,27 +5,6 @@
 // Includes & Defines
 
 
-/* Defines *******************************************************************/
-
-#define RTC                         1 // Enable RTC support
-#define LIGHT_ALL_PRECISE_MINUTES   1 // Display only current minute or show previous ones (cf issue #10)
-#define ENABLE_LDR_SUPPORT          1
-
-/* Pinouts *******************************************************************/
-#define PIN         7 // If all in one wire
-
-#ifdef ENABLE_LDR_SUPPORT
-    #define LDR_PIN     A2
-    #define LDR_VCC     6 /* Pin for sending 5V to divider bridge */
-    #define LDR_GND     5 /* Pin for GND for divider bridge */   
-#endif
-
-/* Constants *****************************************************************/
-#define NUMPIXELS   100 // How many pixels in there (per pin)
-#define BRIGHT      24 // Brightness, between 0 and 255
-#define SATURATION  240 // For colors: we want bright colors so set it to max!
-
-#define DELAYVAL    600 // Time (in milliseconds) to pause between pixels
 
 // Struct
 
@@ -44,6 +23,8 @@ typedef struct
     int* hours;
     int* amPm;
 } ArraysToTurnOn_t;
+
+
 
 
 /* 
@@ -140,4 +121,4 @@ uint8_t getBrightnessLdr(void);
 
 void updateTime(Time_t* pTime);
 
-uint32_t setColor(int brightness, int seconds);
+uint32_t setColor(int brightness, int minutes, int seconds);
