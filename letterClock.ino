@@ -47,6 +47,13 @@ ArraysToTurnOn_t arraysToTurnOn; // Led to light NOW (in this loop)
 ArraysToTurnOn_t arraysAlreadyOn; // LED already turned on
 Time_t currTime;
 
+void setTime(void)
+{
+    char weekDay[][4] = {"Sun", "Mon", "Tue", "Wed", "Thu", "Fri", "Sat" };
+    // year, month, date, hour, min, sec and week-day (starts from 0 for Sunday and goes to 6)
+    DateTime dt(2020, 05, 16, 14, 59, 30, 6);
+    rtc.setDateTime(dt);
+}
 
 int* getHour(int h, int m)
 {
@@ -315,7 +322,7 @@ void updateTime(Time_t* pTime)
 
 uint32_t setColor(int brightness, int minutes, int seconds)
 {
-    uint32_t secondsSinceHueIsZero = (uint32_t)seconds + ((uint32_t)minutes % (PERIOD_COLORS/60)); // Between 0 and 299
+    uint32_t secondsSinceHueIsZero = (uint32_t)seconds + ((uint32_t)minutes % (PERIOD_COLORS/60) * 60); // Between 0 and 299
 
     uint32_t hue = (((uint32_t)65534u * (uint32_t)secondsSinceHueIsZero) / PERIOD_COLORS); 
     // In the end, hue should be between 0 and 65535!
@@ -333,6 +340,9 @@ void setup()
     Serial.begin(9600);
     pixels.begin(); // INITIALIZE NeoPixel strip object (REQUIRED)
 #ifdef RTC
+    #ifdef SET_TIME
+        setTime();
+    #endif
     Wire.begin();
     rtc.begin();
     delay(200); // To make sure everything is loaded (?)
