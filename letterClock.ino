@@ -11,9 +11,11 @@ Adafruit NeoPixel library
 /* Libs to include ***********************************************************/
 #include "letterClock.h"
 #include <Adafruit_NeoPixel.h>
+#include <Wire.h>
+#include "Sodaq_DS3231.h"
 
 #define NUMPIXELS       100 // How many pixels in there (per pin)
-#define BRIGHT          24 // Brightness, between 0 and 255
+#define BRIGHT          60 // Brightness, between 0 and 255
 #define SATURATION      240 // For colors: we want bright colors so set it to max!
 #define PERIOD_COLORS   300 // Cycle through all colors every x seconds
 
@@ -24,19 +26,18 @@ Adafruit NeoPixel library
 #define RTC                         1 // Enable RTC support
 #define LIGHT_ALL_PRECISE_MINUTES   1 // Display only current minute or show previous ones (cf issue #10)
 #define ENABLE_LDR_SUPPORT          1
+// enum    Board                   NANO; // Arduino Nano is used
 
 /* Pinouts *******************************************************************/
-#define PIN             7 // If all in one wire
+/* 
+    Define pinouts. Moreover, I2C pins differ depending on boards. Be careful
+    For Pro Mini: (SDA, SCL) = (A4, A5)
+    For Nano: (SDA, SCL) = (4, 5) (Digital pins)
+*/
+#define PIN             6 // If all in one wire
 
 #ifdef ENABLE_LDR_SUPPORT
-    #define LDR_PIN     A2
-    #define LDR_VCC     6 /* Pin for sending 5V to divider bridge */
-    #define LDR_GND     5 /* Pin for GND for divider bridge */   
-#endif
-#ifdef RTC
-    #define VIN_RTC     10 // Add Vin output to feed RTC module
-    #include <Wire.h>
-    #include "Sodaq_DS3231.h"
+    #define LDR_PIN     A3
 #endif
 
 Adafruit_NeoPixel pixels(NUMPIXELS, PIN, NEO_GRB + NEO_KHZ800);
@@ -45,7 +46,6 @@ Adafruit_NeoPixel pixels(NUMPIXELS, PIN, NEO_GRB + NEO_KHZ800);
 ArraysToTurnOn_t arraysToTurnOn; // Led to light NOW (in this loop)
 ArraysToTurnOn_t arraysAlreadyOn; // LED already turned on
 Time_t currTime;
-
 
 
 int* getHour(int h, int m)
@@ -258,7 +258,7 @@ void refreshLedArray(int* pOldTable, int* pNewTable, uint32_t rgbColors)
 uint8_t getBrightnessLdr(void)
 {
     int res = 0;
-    int adc = analogRead(LDR_PIN); /* Get ADC reading (from 0 to 1023) */
+    int adc = 1023 - analogRead(LDR_PIN); /* Get ADC reading (from 0 to 1023). I swapped VCC and GND, BTW */
     if (adc < 40)
     {
         // y = 1.75x + 20
@@ -333,8 +333,6 @@ void setup()
     Serial.begin(9600);
     pixels.begin(); // INITIALIZE NeoPixel strip object (REQUIRED)
 #ifdef RTC
-    pinMode(VIN_RTC, OUTPUT);
-    digitalWrite(VIN_RTC, HIGH);
     Wire.begin();
     rtc.begin();
     delay(200); // To make sure everything is loaded (?)
@@ -343,10 +341,6 @@ void setup()
 #endif
 #ifdef ENABLE_LDR_SUPPORT
     pinMode(LDR_PIN, INPUT);
-    pinMode(LDR_VCC, OUTPUT);
-    digitalWrite(LDR_VCC, HIGH);
-    pinMode(LDR_GND, OUTPUT);
-    digitalWrite(LDR_GND, LOW);
 #endif
 }
 

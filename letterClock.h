@@ -24,7 +24,11 @@ typedef struct
     int* amPm;
 } ArraysToTurnOn_t;
 
-
+// typedef enum
+// {
+//     NANO;
+//     PRO_MINI;
+// } Boards;
 
 
 /* 
