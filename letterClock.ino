@@ -20,7 +20,7 @@ Adafruit NeoPixel library
 #endif
 
 
-#define PIN         7 // If all in one wire
+#define PIN         6 // If all in one wire
 
 // #define PIN1  4
 // #define PIN2  5
@@ -28,11 +28,12 @@ Adafruit NeoPixel library
 // #define PIN4  7
 // #define PIN5  8
 
-#define NUMPIXELS   100 // How many pixels in there (per pin)
-#define BRIGHT      24 // Brightness, between 0 and 255
-#define SATURATION  240 // For colors: we want bright colors so set it to max!
+#define NUMPIXELS       100 // How many pixels in there (per pin)
+#define BRIGHT          24 // Brightness, between 0 and 255
+#define SATURATION      240 // For colors: we want bright colors so set it to max!
+#define PERIOD_COLORS   300 // Cycle through all colors every x seconds
 
-#define DELAYVAL    600 // Time (in milliseconds) to pause between pixels
+#define DELAYVAL        600 // Time (in milliseconds) to pause between pixels
 
 Adafruit_NeoPixel pixels(NUMPIXELS, PIN, NEO_GRB + NEO_KHZ800);
 
@@ -268,9 +269,11 @@ void updateTime(Time_t* pTime)
     Serial.println(now.second());
 }
 
-uint32_t setColor(int brightness, int seconds)
+uint32_t setColor(int brightness, int minutes, int seconds)
 {
-    uint32_t hue = (((uint32_t)65530u * (uint32_t)seconds) / 60u); 
+    uint32_t secondsSinceHueIsZero = (uint32_t)seconds + ((uint32_t)minutes % (PERIOD_COLORS/60)); // Between 0 and 299
+
+    uint32_t hue = (((uint32_t)65534u * (uint32_t)secondsSinceHueIsZero) / PERIOD_COLORS); 
     // In the end, hue should be between 0 and 65535!
 
     uint32_t rgb = Adafruit_NeoPixel::ColorHSV(hue, SATURATION, brightness); 
@@ -303,7 +306,7 @@ void loop()
     updateTime(&currTime);
     updateArraysToTurnOn(&arraysToTurnOn, currTime);
     
-    uint32_t colorToUse = setColor(BRIGHT, currTime.s);
+    uint32_t colorToUse = setColor(BRIGHT, currTime.m, currTime.s);
     // Serial.print("*** It is ");
     // Serial.print(currTime.h);
     // Serial.print(":");

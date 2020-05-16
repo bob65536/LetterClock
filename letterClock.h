@@ -104,4 +104,4 @@ void refreshLedArray(int* pOldTable, int* pNewTable, uint32_t rgbColors);
 
 void updateTime(Time_t* pTime);
 
-uint32_t setColor(int brightness, int seconds);
+uint32_t setColor(int brightness, int minutes, int seconds);
