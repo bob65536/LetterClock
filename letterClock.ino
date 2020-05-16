@@ -11,12 +11,33 @@ Adafruit NeoPixel library
 /* Libs to include ***********************************************************/
 #include "letterClock.h"
 #include <Adafruit_NeoPixel.h>
+
+#define NUMPIXELS       100 // How many pixels in there (per pin)
+#define BRIGHT          24 // Brightness, between 0 and 255
+#define SATURATION      240 // For colors: we want bright colors so set it to max!
+#define PERIOD_COLORS   300 // Cycle through all colors every x seconds
+
+#define DELAYVAL        600 // Time (in milliseconds) to pause between pixels
+
+/* Defines *******************************************************************/
+
+#define RTC                         1 // Enable RTC support
+#define LIGHT_ALL_PRECISE_MINUTES   1 // Display only current minute or show previous ones (cf issue #10)
+#define ENABLE_LDR_SUPPORT          1
+
+/* Pinouts *******************************************************************/
+#define PIN             7 // If all in one wire
+
+#ifdef ENABLE_LDR_SUPPORT
+    #define LDR_PIN     A2
+    #define LDR_VCC     6 /* Pin for sending 5V to divider bridge */
+    #define LDR_GND     5 /* Pin for GND for divider bridge */   
+#endif
 #ifdef RTC
+    #define VIN_RTC     10 // Add Vin output to feed RTC module
     #include <Wire.h>
     #include "Sodaq_DS3231.h"
-    #define VIN_RTC     10 // Add Vin output to feed RTC module
 #endif
-
 
 Adafruit_NeoPixel pixels(NUMPIXELS, PIN, NEO_GRB + NEO_KHZ800);
 
@@ -292,9 +313,11 @@ void updateTime(Time_t* pTime)
     Serial.println(now.second());
 }
 
-uint32_t setColor(int brightness, int seconds)
+uint32_t setColor(int brightness, int minutes, int seconds)
 {
-    uint32_t hue = (((uint32_t)65530u * (uint32_t)seconds) / 60u); 
+    uint32_t secondsSinceHueIsZero = (uint32_t)seconds + ((uint32_t)minutes % (PERIOD_COLORS/60)); // Between 0 and 299
+
+    uint32_t hue = (((uint32_t)65534u * (uint32_t)secondsSinceHueIsZero) / PERIOD_COLORS); 
     // In the end, hue should be between 0 and 65535!
 
     uint32_t rgb = Adafruit_NeoPixel::ColorHSV(hue, SATURATION, brightness); 
@@ -333,11 +356,12 @@ void loop()
 
     updateTime(&currTime);
     updateArraysToTurnOn(&arraysToTurnOn, currTime);
+
 #ifdef ENABLE_LDR_SUPPORT
     uint8_t brightness = getBrightnessLdr();
-    uint32_t colorToUse = setColor(brightness, currTime.s);
+    uint32_t colorToUse = setColor(brightness, currTime.m, currTime.s);
 #else
-    uint32_t colorToUse = setColor(BRIGHT, currTime.s);
+    uint32_t colorToUse = setColor(BRIGHT, currTime.m, currTime.s);
 #endif
     // Serial.print("*** It is ");
     // Serial.print(currTime.h);
