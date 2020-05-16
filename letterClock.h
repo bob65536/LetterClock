@@ -1,4 +1,10 @@
-// Includes et al.
+/* 
+    An interesting description
+*/
+
+// Includes & Defines
+
+
 
 // Struct
 
@@ -59,11 +65,20 @@ int m20[] = {6, 15,16,17,18,19,20};
 int m25[] = {10, 11,12,13,14,15,16,17,18,19,20};
 int m30[] = {4, 7,8,9,10};
 
+// Precise minutes
+#ifdef LIGHT_ALL_PRECISE_MINUTES // Show all precise minutes (0-4 LED)
+int m0[] = {0};
+int m1[] = {1, 94};
+int m2[] = {2, 93,94};
+int m3[] = {3, 92,93,94};
+int m4[] = {4, 91,92,93,94};
+#else // Show only current precise minutes (0-1 LED)
 int m0[] = {0};
 int m1[] = {1, 94};
 int m2[] = {1, 93};
 int m3[] = {1, 92};
 int m4[] = {1, 91};
+#endif
 
 // Prototypes
 
@@ -101,6 +116,8 @@ void turnLedOnArray(int* pTable, uint32_t rgbColors);
 void turnLedOffArray(int* pTable);
 
 void refreshLedArray(int* pOldTable, int* pNewTable, uint32_t rgbColors);
+
+uint8_t getBrightnessLdr(void);
 
 void updateTime(Time_t* pTime);
 

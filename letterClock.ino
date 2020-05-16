@@ -8,25 +8,9 @@ Adafruit NeoPixel library
 
  */
 
-
-#define RTC         1 // Enable RTC support
-
+/* Libs to include ***********************************************************/
 #include "letterClock.h"
 #include <Adafruit_NeoPixel.h>
-#ifdef RTC
-    #include <Wire.h>
-    #include "Sodaq_DS3231.h"
-    #define VIN_RTC     10 // Add Vin output to feed RTC module
-#endif
-
-
-#define PIN         6 // If all in one wire
-
-// #define PIN1  4
-// #define PIN2  5
-// #define PIN3  6
-// #define PIN4  7
-// #define PIN5  8
 
 #define NUMPIXELS       100 // How many pixels in there (per pin)
 #define BRIGHT          24 // Brightness, between 0 and 255
@@ -34,6 +18,26 @@ Adafruit NeoPixel library
 #define PERIOD_COLORS   300 // Cycle through all colors every x seconds
 
 #define DELAYVAL        600 // Time (in milliseconds) to pause between pixels
+
+/* Defines *******************************************************************/
+
+#define RTC                         1 // Enable RTC support
+#define LIGHT_ALL_PRECISE_MINUTES   1 // Display only current minute or show previous ones (cf issue #10)
+#define ENABLE_LDR_SUPPORT          1
+
+/* Pinouts *******************************************************************/
+#define PIN             7 // If all in one wire
+
+#ifdef ENABLE_LDR_SUPPORT
+    #define LDR_PIN     A2
+    #define LDR_VCC     6 /* Pin for sending 5V to divider bridge */
+    #define LDR_GND     5 /* Pin for GND for divider bridge */   
+#endif
+#ifdef RTC
+    #define VIN_RTC     10 // Add Vin output to feed RTC module
+    #include <Wire.h>
+    #include "Sodaq_DS3231.h"
+#endif
 
 Adafruit_NeoPixel pixels(NUMPIXELS, PIN, NEO_GRB + NEO_KHZ800);
 
@@ -251,6 +255,46 @@ void refreshLedArray(int* pOldTable, int* pNewTable, uint32_t rgbColors)
     turnLedOnArray(pNewTable, rgbColors);
 }
 
+uint8_t getBrightnessLdr(void)
+{
+    int res = 0;
+    int adc = analogRead(LDR_PIN); /* Get ADC reading (from 0 to 1023) */
+    if (adc < 40)
+    {
+        // y = 1.75x + 20
+        int ax = (7 * adc) >> 2; // divide by 4
+        res = ax + 20;
+    }
+    else if (adc > 920)
+    {
+        // y = 0.5x - 260
+        int ax = adc >> 1; // divide by 2
+        res = ax - 260;
+    }
+    else
+    {
+        // y = 0.125x + 85
+        int ax = adc >> 3; // divide by 8
+        res = ax + 85;
+    }
+    Serial.print("¤¤¤ Brightness: ");
+    Serial.print(res);
+    Serial.print(" ADC: ");
+    Serial.println(adc);
+    
+    if (res < 0)
+    {
+        return 0;
+    }
+    else if (res > 255)
+    {
+        return 255;
+    }
+    else
+    {
+        return (uint8_t)res;
+    }
+}
 
 void updateTime(Time_t* pTime)
 {
@@ -297,6 +341,13 @@ void setup()
     updateTime(&currTime);
     updateArraysToTurnOn(&arraysAlreadyOn, currTime); // Init variable
 #endif
+#ifdef ENABLE_LDR_SUPPORT
+    pinMode(LDR_PIN, INPUT);
+    pinMode(LDR_VCC, OUTPUT);
+    digitalWrite(LDR_VCC, HIGH);
+    pinMode(LDR_GND, OUTPUT);
+    digitalWrite(LDR_GND, LOW);
+#endif
 }
 
 void loop() 
@@ -305,20 +356,18 @@ void loop()
 
     updateTime(&currTime);
     updateArraysToTurnOn(&arraysToTurnOn, currTime);
-    
+
+#ifdef ENABLE_LDR_SUPPORT
+    uint8_t brightness = getBrightnessLdr();
+    uint32_t colorToUse = setColor(brightness, currTime.m, currTime.s);
+#else
     uint32_t colorToUse = setColor(BRIGHT, currTime.m, currTime.s);
+#endif
     // Serial.print("*** It is ");
     // Serial.print(currTime.h);
     // Serial.print(":");
     // Serial.println(currTime.m);    
  
-    // RGB_colors_t colorToUse;
-
-    // // Use red color for testing
-    // colorToUse.r = BRIGHT;
-    // colorToUse.g = 0;
-    // colorToUse.b = 0;
-
     turnLedOnArray(itis, colorToUse);
     refreshLedArray(arraysAlreadyOn.minutes ,arraysToTurnOn.minutes, colorToUse);
     refreshLedArray(arraysAlreadyOn.preciseMinutes, arraysToTurnOn.preciseMinutes, colorToUse);
