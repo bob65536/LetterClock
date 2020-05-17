@@ -9,7 +9,7 @@ Adafruit NeoPixel library
  */
 
 /* Libs to include ***********************************************************/
-#include "letterClock.h"
+#include "src/letterClock.h"
 #include <Adafruit_NeoPixel.h>
 #include <Wire.h>
 #include "Sodaq_DS3231.h"
