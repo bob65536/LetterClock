@@ -24,7 +24,6 @@ Adafruit NeoPixel library
 /* Defines *******************************************************************/
 
 #define RTC                         1 // Enable RTC support
-#define LIGHT_ALL_PRECISE_MINUTES   1 // Display only current minute or show previous ones (cf issue #10)
 #define ENABLE_LDR_SUPPORT          1
 // enum    Board                   NANO; // Arduino Nano is used
 
