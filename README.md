@@ -2,11 +2,11 @@
 
 _Read time with class and only with letters!_
 
-![Picture of the finished project](https://raw.githubusercontent.com/bob65536/LetterClock/master/pics/photoClock_800.jpg "Photo of the finished project. Wonderful!")
+![Picture of the finished project](https://raw.githubusercontent.com/bob65536/LetterClock/master/docs/pics/photoClock_800.jpg "Photo of the finished project. Wonderful!")
 
 This Arduino project is something I wanted to do during lockdown. It was not really fun until you get good results (unfortunately not before soldering three hundred wires).
 
-To have your own version without electronics (a spreadsheet), go see MatrixLetters.ods
+To have your own version without electronics (a spreadsheet), go see [MatrixLetters.ods](https://github.com/bob65536/LetterClock/blob/master/docs/MatrixLetters.ods)
 If you feel adventurous, feel free to use this project as an inspiration.
 
 In the future, I will add a Bill of Materials (BOM) and detailled instructions. 
@@ -27,7 +27,7 @@ To get started, you will need a few tools:
 #### For a nice final touch
 - Something that can scatter light (I used tissues and parts from a dumped television).
 - A frame (I used a 30cm x 30cm here).
-- Transparent sheets (Rhodoid) to print [this](https://github.com/bob65536/LetterClock/blob/master/toPrint_MatrixLettersRV.pdf). You can use regular paper if you don't have this in stock.  
+- Transparent sheets (Rhodoid) to print [this](https://github.com/bob65536/LetterClock/blob/master/docs/toPrint_MatrixLettersRV.pdf). You can use regular paper if you don't have this in stock.  
 
 ### Software
 - **Arduino IDE**

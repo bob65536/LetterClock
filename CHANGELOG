@@ -1,6 +1,7 @@
+[2020-05-17] Rev 1.0 : LDR added and stability improvements (FW does what it should do)
+             <TAG v1.0>
 
-
-[2020-05-12] Rev 1 : Displays the right time
+[2020-05-12] Rev 0.3 : Displays the right time
 
 [2020-05-11] Rev 0.2 : RTC support
 
@@ -10,9 +11,7 @@
 
 TODO
 
-    Rev 1.1: Support LDR to adapt brightness
-    Rev 1.2: Add buttons to set time
-    Rev 1.3: Fancy colors
+    Rev 1.1: Add buttons to set time
     Rev 2: Add demo switches to show nice things (heart, etc)
     Rev 3: Add alarm and buzzer
     Rev 4: ???
