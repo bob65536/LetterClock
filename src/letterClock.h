@@ -4,7 +4,7 @@
 
 // Includes & Defines
 #define LIGHT_ALL_PRECISE_MINUTES   1 // Display only current minute or show previous ones (cf issue #10)
-
+#define FR // Define locale (EN for English, FR for French)
 
 
 // Struct
@@ -37,6 +37,7 @@ typedef struct
     Note: if count from 0, remove 1 from these values!
     Also: First value is the length of array. Do not turn the LED ID on!!!
 */
+#ifdef EN
 // Always on ("it is...")
 int itis[] = {4, 1,2,4,5};
 
@@ -69,6 +70,44 @@ int m15[] = {8, 8,21,22,23,24,25,26,27};
 int m20[] = {6, 15,16,17,18,19,20};
 int m25[] = {10, 11,12,13,14,15,16,17,18,19,20};
 int m30[] = {4, 7,8,9,10};
+
+#endif // ifdef EN
+
+#ifdef FR 
+// Always on ("it is...")
+int itis[] = {5, 1,2,4,5,6};
+
+// Hours
+int h1[] = {3, 8,9,10};
+int h2[] = {4, 41,43,44,45};
+int h3[] = {5, 16,17,18,19,20};
+int h4[] = {6, 32,33,34,35,36,37};
+int h5[] = {4, 37,38,39,40};
+int h6[] = {3, 14,15,16};
+int h7[] = {4, 27,28,29,30};
+int h8[] = {4, 47,48,49,50};
+int h9[] = {4, 42,43,44,46};
+int h10[] = {3, 11,12,13};
+int h11[] = {4, 22,24,25,26};
+int h12[] = {5, 21,22,23,25,26};
+
+int am[] = {2, 99,100};
+int pm[] = {2, 97,98};
+
+// Past/To/OClock
+int past[] = {0};
+int to[] = {5, 61,62,63,64,65};
+int oclock[] = {0};
+
+// Minutes
+int m5[]  = {4, 71,72,73,74};
+int m10[] = {3, 83,84,85};
+int m15[] = {7, 51,52,86,87,88,89,90}; // et quart
+int m45[] = {7, 81,82,86,87,88,89,90}; // [moins] le quart
+int m20[] = {5, 76,77,78,79,80};
+int m25[] = {10, 71,72,73,74,75,76,77,78,79,80};
+int m30[] = {7, 51,52,66,67,68,69,70};
+#endif // ifdef FR
 
 // Precise minutes
 #ifdef LIGHT_ALL_PRECISE_MINUTES // Show all precise minutes (0-4 LED)

@@ -139,10 +139,21 @@ int* getMinutes(int m)
     {
         pRes = m10;
     }
+#ifdef FR // In French, there is a little difference between 10:15 and 10:45 (et quart / moins le quart)
+    else if ((m >= 15) && (m < 20))
+    {
+        pRes = m15;
+    }
+    else if ((m >= 45) && (m < 50))
+    {
+        pRes = m45;
+    }
+#else // For other languages (English so far), normal mode
     else if (((m >= 15) && (m < 20)) || ((m >= 45) && (m < 50)))
     {
         pRes = m15;
     }
+#endif
     else if (((m >= 20) && (m < 25)) || ((m >= 40) && (m < 45)))
     {
         pRes = m20;
