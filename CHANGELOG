@@ -1,3 +1,5 @@
+[2026-11-25] Rev 1.1 : Add EEPROM support to set time at first flash (to be done manually)
+
 [2020-05-17] Rev 1.0 : LDR added and stability improvements (FW does what it should do)
              <TAG v1.0>
 
@@ -14,4 +16,4 @@ TODO
     Rev 1.1: Add buttons to set time
     Rev 2: Add demo switches to show nice things (heart, etc)
     Rev 3: Add alarm and buzzer
-    Rev 4: ???
+    Rev 4: DST changes (country-dependent)
