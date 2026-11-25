@@ -51,7 +51,7 @@ Time_t currTime;
 
 // Logic here: if EEPROM is blank (1st boot after flash), set time and magic number
 const int MAGIC_EEP = 0x45; // change it if published on GitHub
-DateTime timeToSet(2026, 11, 25, 10, 58, 30, 3);
+DateTime timeToSet(2026, 11, 25, 11, 6, 10, 3);
 uint32_t timeToSet_ts = timeToSet.getEpoch();
 
 void setTime(void)
@@ -71,9 +71,20 @@ void driftCompensation(void)
     // static int counter_period = 0; // Is incremented at each period (~500ms)
     const uint32_t period_update_s = 12 * 3600; // update every 12h at least
     uint32_t now_ts = rtc.now().getEpoch();
+    Serial.print("Epoch now: ");
+    Serial.print((uint32_t)now_ts);
+    Serial.print(" | last update: ");
+    Serial.print((uint32_t)(lastCompensation_ts - now_ts));
+    Serial.println(" secs ago");
+
     if (((lastCompensation_ts - now_ts) > period_update_s) && (rtc.now().hour() == 3))
     {
-      uint32_t compensatedTime_ts = (int32_t)((float)(now_ts-timeToSet_ts)*(float)DRIFT_COMPENSATION_PPM/1000000.0) + now_ts;
+      Serial.println("Time for an update!");
+      int32_t delta_s = ((float)(now_ts-timeToSet_ts)*(float)DRIFT_COMPENSATION_PPM/1000000.0);
+      Serial.print("Delta = ");
+      Serial.print(delta_s);
+      Serial.println(" secs");
+      uint32_t compensatedTime_ts = delta_s + now_ts;
       rtc.setDateTime(compensatedTime_ts);
       lastCompensation_ts = compensatedTime_ts;
     }
