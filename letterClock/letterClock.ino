@@ -50,16 +50,16 @@ ArraysToTurnOn_t arraysAlreadyOn; // LED already turned on
 Time_t currTime;
 
 // Logic here: if EEPROM is blank (1st boot after flash), set time and magic number
-const int MAGIC_EEP = 0x45; // change it if published on GitHub
-DateTime timeToSet(2026, 11, 25, 11, 6, 10, 3);
-uint32_t timeToSet_ts = timeToSet.getEpoch();
+const int MAGIC_EEP = 0x11; // change it if published on GitHub
+DateTime timeToSet(__DATE__,__TIME__); //Why bothering when you can use the compiler time?
+uint32_t timeToSet_ts = timeToSet.getEpoch() + 10; // between time to build and to flash, there is 10s
 
 void setTime(void)
 {
     // Change MAGIC_EEP to apply changes.Consider updating timeToSet (global var)
     char weekDay[][4] = {"Sun", "Mon", "Tue", "Wed", "Thu", "Fri", "Sat" };
     // year, month, date, hour, min, sec and week-day (starts from 0 for Sunday and goes to 6)
-    rtc.setDateTime(timeToSet);
+    rtc.setEpoch(timeToSet_ts); 
 }
 
 // To be run every minute. Time will be changed at 3:00
@@ -74,18 +74,18 @@ void driftCompensation(void)
     Serial.print("Epoch now: ");
     Serial.print((uint32_t)now_ts);
     Serial.print(" | last update: ");
-    Serial.print((uint32_t)(lastCompensation_ts - now_ts));
+    Serial.print((uint32_t)(now_ts - lastCompensation_ts));
     Serial.println(" secs ago");
 
-    if (((lastCompensation_ts - now_ts) > period_update_s) && (rtc.now().hour() == 3))
+    if (((now_ts - lastCompensation_ts) > period_update_s) && ((rtc.now().hour() == 3) && (rtc.now().minute() == 33)))
     {
       Serial.println("Time for an update!");
-      int32_t delta_s = ((float)(now_ts-timeToSet_ts)*(float)DRIFT_COMPENSATION_PPM/1000000.0);
+      int32_t delta_s = ((float)((int32_t)now_ts-(int32_t)timeToSet_ts)*(float)DRIFT_COMPENSATION_PPM/1000000.0);
       Serial.print("Delta = ");
       Serial.print(delta_s);
       Serial.println(" secs");
       uint32_t compensatedTime_ts = delta_s + now_ts;
-      rtc.setDateTime(compensatedTime_ts);
+      rtc.setEpoch(compensatedTime_ts);
       lastCompensation_ts = compensatedTime_ts;
     }
 }
@@ -345,7 +345,7 @@ void updateTime(Time_t* pTime)
     pTime->h = now.hour();
     pTime->m = now.minute();
     pTime->s = now.second();
-    // int dy = now.day();
+    // int dy = now.date();
     // int mo = now.month();
     // int yr = now.year();
     Serial.print("/// RTC says: time is ");
@@ -354,6 +354,11 @@ void updateTime(Time_t* pTime)
     Serial.print(now.minute());
     Serial.print(":");
     Serial.println(now.second());
+    // Serial.print(yr);
+    // Serial.print("-");
+    // Serial.print(mo);
+    // Serial.print("-");
+    // Serial.println(dy);
 }
 
 uint32_t setColor(int brightness, int minutes, int seconds)
@@ -392,6 +397,9 @@ void setup()
       Serial.println("Time already set.");
     }
     Wire.begin();
+
+    Serial.println(__TIME__);
+    Serial.println(__DATE__);
     
     delay(200); // To make sure everything is loaded (?)
     updateTime(&currTime);
